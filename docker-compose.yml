@@ -1,0 +1,23 @@
+services:
+  payment-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/payments;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+      PAYMENT_FRAUD_BASE_URL: http://127.0.0.1:8080
+      PAYMENT_FRAUD_ENABLED_STUB: "true"
+      FRAUD_STUB_FAILURE_RATE: "0.1"
+      FRAUD_STUB_MIN_LATENCY_MS: "20"
+      FRAUD_STUB_MAX_LATENCY_MS: "200"
+    volumes:
+      - payment-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+volumes:
+  payment-data:

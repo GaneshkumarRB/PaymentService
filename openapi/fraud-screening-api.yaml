@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: Vendor Fraud Screening API
+  version: 2.0.0
+  description: |
+    Third-party XML-over-HTTP fraud screening vendor API.
+    Namespace for XML payloads: urn:vendor:fraudscreen:v2
+    Success payloads use Header + Result; failure payloads use nested Error under ScreeningResponse.
+servers:
+  - url: /
+tags:
+  - name: FraudScreening
+paths:
+  /screening/v2/check:
+    post:
+      tags:
+        - FraudScreening
+      operationId: screenPayment
+      summary: Screen a payment for fraud risk
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ScreeningRequest'
+      responses:
+        '200':
+          description: Screening result (Header + Result)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ScreeningResponse'
+        '500':
+          description: Vendor technical error (ScreeningResponse with nested Error)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ScreeningResponse'
+components:
+  schemas:
+    ScreeningRequest:
+      type: object
+      required: [paymentId, amount, currency, sourceAccountNumber, destinationAccountNumber]
+      xml:
+        name: ScreeningRequest
+        namespace: urn:vendor:fraudscreen:v2
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+          xml:
+            name: PaymentId
+        amount:
+          type: number
+          format: double
+          xml:
+            name: Amount
+        currency:
+          type: string
+          xml:
+            name: Currency
+        sourceAccountNumber:
+          type: string
+          xml:
+            name: SourceAccountNumber
+        destinationAccountNumber:
+          type: string
+          xml:
+            name: DestinationAccountNumber
+        reference:
+          type: string
+          xml:
+            name: Reference
+    ScreeningResponse:
+      type: object
+      xml:
+        name: ScreeningResponse
+        namespace: urn:vendor:fraudscreen:v2
+        prefix: fs
+      properties:
+        header:
+          allOf:
+            - $ref: '#/components/schemas/ScreeningHeader'
+          xml:
+            name: Header
+        result:
+          allOf:
+            - $ref: '#/components/schemas/ScreeningResult'
+          xml:
+            name: Result
+        error:
+          allOf:
+            - $ref: '#/components/schemas/Error'
+          xml:
+            name: Error
+    ScreeningHeader:
+      type: object
+      xml:
+        name: Header
+        namespace: urn:vendor:fraudscreen:v2
+        prefix: fs
+      properties:
+        requestRef:
+          type: string
+          xml:
+            name: RequestRef
+        timestamp:
+          type: string
+          xml:
+            name: Timestamp
+    ScreeningResult:
+      type: object
+      required: [decision, riskScore]
+      xml:
+        name: Result
+        namespace: urn:vendor:fraudscreen:v2
+        prefix: fs
+      properties:
+        decision:
+          type: string
+          enum: [ACCEPT, REVIEW, DECLINE]
+          xml:
+            name: Decision
+        riskScore:
+          type: integer
+          format: int32
+          xml:
+            name: RiskScore
+        reasons:
+          type: array
+          xml:
+            name: Reasons
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Reason'
+    Reason:
+      type: object
+      xml:
+        name: Reason
+        namespace: urn:vendor:fraudscreen:v2
+        prefix: fs
+      properties:
+        code:
+          type: string
+          xml:
+            attribute: true
+            name: code
+        value:
+          type: string
+          description: Element text content
+    Error:
+      type: object
+      required: [code, message, retryable]
+      xml:
+        name: Error
+        namespace: urn:vendor:fraudscreen:v2
+        prefix: fs
+      properties:
+        code:
+          type: string
+          xml:
+            name: Code
+        message:
+          type: string
+          xml:
+            name: Message
+        retryable:
+          type: boolean
+          xml:
+            name: Retryable

@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: Payment Submission API
+  version: 1.0.0
+  description: Accepts payment submissions, persists them, and exposes fraud screening decisions.
+servers:
+  - url: /
+tags:
+  - name: Payments
+paths:
+  /payments:
+    post:
+      tags: [Payments]
+      operationId: submitPayment
+      summary: Submit a payment for processing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Business rule violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/{id}:
+    get:
+      tags: [Payments]
+      operationId: getPayment
+      summary: Retrieve a payment by id including fraud decision when available
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AccountDetails:
+      type: object
+      required: [name, accountNumber]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          example: Acme Corp
+        accountNumber:
+          type: string
+          description: Alphanumeric account number (8-34 characters)
+          pattern: '^[A-Za-z0-9]{8,34}$'
+          example: GB29NWBK60161331926819
+    PaymentRequest:
+      type: object
+      required:
+        - sourceAccount
+        - destinationAccount
+        - amount
+        - currency
+        - reference
+        - requestedExecutionDate
+      properties:
+        sourceAccount:
+          $ref: '#/components/schemas/AccountDetails'
+        destinationAccount:
+          $ref: '#/components/schemas/AccountDetails'
+        amount:
+          type: number
+          format: double
+          exclusiveMinimum: 0
+          example: 1250.50
+        currency:
+          type: string
+          enum: [USD, EUR, GBP]
+          example: EUR
+        reference:
+          type: string
+          minLength: 1
+          maxLength: 140
+          example: Invoice-4421
+        requestedExecutionDate:
+          type: string
+          format: date
+          example: '2026-11-20'
+    FraudDecision:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [ACCEPT, REVIEW, DECLINE]
+        riskScore:
+          type: integer
+          format: int32
+        reasons:
+          type: array
+          items:
+            type: string
+        screenedAt:
+          type: string
+          format: date-time
+    PaymentResponse:
+      type: object
+      required: [id, status, sourceAccount, destinationAccount, amount, currency, reference, requestedExecutionDate, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [ACCEPTED, SCREENING, COMPLETED, FAILED]
+        sourceAccount:
+          $ref: '#/components/schemas/AccountDetails'
+        destinationAccount:
+          $ref: '#/components/schemas/AccountDetails'
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        reference:
+          type: string
+        requestedExecutionDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        fraudDecision:
+          $ref: '#/components/schemas/FraudDecision'
+        ledgerPosted:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string

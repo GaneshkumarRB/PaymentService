@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fs:ScreeningResponse xmlns:fs="urn:vendor:fraudscreen:v2">
+<fs:Header>
+<fs:RequestRef>PAY-7f3a9c</fs:RequestRef>
+<fs:Timestamp>2026-11-12T09:15:22+13:00</fs:Timestamp>
+</fs:Header>
+<fs:Result>
+<fs:Decision>DECLINE</fs:Decision> <!-- ACCEPT | REVIEW | DECLINE -->
+<fs:RiskScore>95</fs:RiskScore>
+<fs:Reasons>
+<fs:Reason code="R104">New payee</fs:Reason>
+<fs:Reason code="R221">Amount above customer average</fs:Reason>
+</fs:Reasons>
+</fs:Result>
+</fs:ScreeningResponse>

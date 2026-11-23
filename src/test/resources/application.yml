@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:payments-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+payment:
+  supported-currencies: USD,EUR,GBP
+  outbox:
+    poll-interval-ms: 100
+    batch-size: 50
+  messaging:
+    worker-threads: 2
+    max-attempts: 3
+    initial-backoff-ms: 50
+    max-backoff-ms: 200
+    backoff-multiplier: 2.0
+  fraud:
+    base-url: http://localhost:${local.server.port:8080}
+    connect-timeout-ms: 2000
+    read-timeout-ms: 5000
+    enabled-stub: true
+
+fraud-stub:
+  risk-amount-threshold: 1000
+  failure-amount-threshold: 5000
+  min-latency-ms: 0
+  max-latency-ms: 0
+
+logging:
+  level:
+    com.bnk.paymentservice: INFO

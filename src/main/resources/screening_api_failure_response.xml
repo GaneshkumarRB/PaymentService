@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fs:ScreeningResponse xmlns:fs="urn:vendor:fraudscreen:v2">
+<fs:Error>
+<fs:Code>SVC-503</fs:Code>
+<fs:Message>Scoring engine temporarily unavailable</fs:Message>
+<fs:Retryable>true</fs:Retryable>
+</fs:Error>
+</fs:ScreeningResponse>

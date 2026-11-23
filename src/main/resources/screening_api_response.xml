@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fs:ScreeningResponse xmlns:fs="urn:vendor:fraudscreen:v2">
+<fs:Header>
+<fs:RequestRef>PAY-accept</fs:RequestRef>
+<fs:Timestamp>2026-11-12T09:15:22+13:00</fs:Timestamp>
+</fs:Header>
+<fs:Result>
+<fs:Decision>ACCEPT</fs:Decision> <!-- ACCEPT | REVIEW | DECLINE -->
+<fs:RiskScore>12</fs:RiskScore>
+<fs:Reasons>
+<fs:Reason code="R001">Within normal risk band</fs:Reason>
+</fs:Reasons>
+</fs:Result>
+</fs:ScreeningResponse>
