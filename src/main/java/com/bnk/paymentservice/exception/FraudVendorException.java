@@ -1,5 +1,8 @@
 package com.bnk.paymentservice.exception;
 
+/**
+ * Represents a fraud provider error with its code and retryability.
+ */
 public class FraudVendorException extends RuntimeException {
 
     private final String code;

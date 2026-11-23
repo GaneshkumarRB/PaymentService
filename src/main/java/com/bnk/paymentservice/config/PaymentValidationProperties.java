@@ -7,6 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Holds the currencies supported by payment validation.
+ */
 @ConfigurationProperties(prefix = "payment")
 public class PaymentValidationProperties {
 

@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * Implements the payment submission and retrieval endpoints.
+ */
 @RestController
 public class PaymentsApiController implements PaymentsApi {
 

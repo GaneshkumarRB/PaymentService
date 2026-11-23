@@ -6,6 +6,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * Starts the payment service and enables scheduled background processing.
+ */
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(

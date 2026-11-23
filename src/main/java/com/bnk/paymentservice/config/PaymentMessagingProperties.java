@@ -2,6 +2,9 @@ package com.bnk.paymentservice.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Holds broker worker and retry settings for payment event processing.
+ */
 @ConfigurationProperties(prefix = "payment.messaging")
 public class PaymentMessagingProperties {
 

@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Translates request validation and application exceptions into API error responses.
+ */
 @RestControllerAdvice
 public class ApiExceptionHandler {
 

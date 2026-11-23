@@ -21,6 +21,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Validates and stores payment submissions with an outbox event, and retrieves payments.
+ */
 @Service
 public class PaymentService {
 

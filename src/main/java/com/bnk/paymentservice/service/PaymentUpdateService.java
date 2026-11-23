@@ -16,11 +16,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Applies fraud and ledger updates using transactions with optimistic-lock retries.
+ */
 @Service
 public class PaymentUpdateService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+    
     @Autowired
     private PlatformTransactionManager transactionManager;
 
@@ -40,7 +44,7 @@ public class PaymentUpdateService {
                                             List<String> reasons,
                                             Instant screenedAt) {
         ObjectOptimisticLockingFailureException last = null;
-        for (int attempt = 1; attempt <= 5; attempt++) {
+        for (int attempt = 1; attempt <= AppConstants.MAX_OPTIMISTIC_LOCK_ATTEMPTS; attempt++) {
             try {
                 transactionTemplate.executeWithoutResult(status -> {
                     Payment payment = paymentRepository.findById(paymentId)
@@ -51,7 +55,6 @@ public class PaymentUpdateService {
                     if (payment.getFraudDecision() != null) {
                         return;
                     }
-                    payment.markScreening();
                     payment.applyFraudDecision(decision, riskScore, reasons, screenedAt);
                     paymentRepository.saveAndFlush(payment);
                 });
@@ -69,7 +72,7 @@ public class PaymentUpdateService {
 
     public void markLedgerPostedWithRetry(UUID paymentId) {
         ObjectOptimisticLockingFailureException last = null;
-        for (int attempt = 1; attempt <= 5; attempt++) {
+        for (int attempt = 1; attempt <= AppConstants.MAX_OPTIMISTIC_LOCK_ATTEMPTS; attempt++) {
             try {
                 transactionTemplate.executeWithoutResult(status -> {
                     Payment payment = paymentRepository.findById(paymentId).orElse(null);

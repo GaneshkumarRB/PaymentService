@@ -1,5 +1,8 @@
 package com.bnk.paymentservice.common;
 
+/**
+ * Shared identifiers, error codes, messages, and resource names used by the service.
+ */
 public final class AppConstants {
 
     private AppConstants() {
@@ -65,4 +68,5 @@ public final class AppConstants {
     public static final String FIELD_DESTINATION_ACCOUNT = "destinationAccount";
 
     public static final String DEFAULT_FRAUD_BASE_URL = "http://localhost:8080";
+    public static final int MAX_OPTIMISTIC_LOCK_ATTEMPTS = 5;
 }

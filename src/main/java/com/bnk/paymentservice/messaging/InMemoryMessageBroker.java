@@ -168,6 +168,9 @@ public class InMemoryMessageBroker {
         }
     }
 
+    /**
+     * Wraps a broker message for delivery when its scheduled delay expires.
+     */
     private static final class DelayedBrokerMessage implements Delayed {
         private final BrokerMessage message;
 

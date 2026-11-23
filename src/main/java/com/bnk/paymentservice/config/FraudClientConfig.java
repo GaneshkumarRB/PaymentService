@@ -26,6 +26,9 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.util.Arrays;
 
+/**
+ * Configures the generated fraud client, XML mapping, and HTTP transport.
+ */
 @Configuration
 public class FraudClientConfig {
 

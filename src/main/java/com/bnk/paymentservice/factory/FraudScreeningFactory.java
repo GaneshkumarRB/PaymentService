@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Builds fraud screening requests and translates provider responses and errors.
+ */
 @Component
 public class FraudScreeningFactory {
 

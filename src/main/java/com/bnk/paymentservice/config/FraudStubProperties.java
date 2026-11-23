@@ -2,6 +2,9 @@ package com.bnk.paymentservice.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Holds the amount thresholds and simulated latency for the fraud screening stub.
+ */
 @ConfigurationProperties(prefix = "fraud-stub")
 public class FraudStubProperties {
 

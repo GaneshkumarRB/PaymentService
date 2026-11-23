@@ -4,6 +4,9 @@ import com.bnk.paymentservice.common.AppConstants;
 
 import java.util.List;
 
+/**
+ * Reports validation failures for a payment request.
+ */
 public class PaymentValidationException extends BadRequestException {
 
     public PaymentValidationException(String code, String message, List<String> details) {

@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * Validates payment amounts, currencies, accounts, references, and execution dates.
+ */
 @Component
 public class PaymentValidator {
 

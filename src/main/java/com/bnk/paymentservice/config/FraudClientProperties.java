@@ -2,6 +2,9 @@ package com.bnk.paymentservice.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Holds the fraud provider URL, timeouts, and in-process stub setting.
+ */
 @ConfigurationProperties(prefix = "payment.fraud")
 public class FraudClientProperties {
 

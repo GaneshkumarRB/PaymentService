@@ -15,6 +15,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
+/**
+ * Builds payment entities from requests and payment responses from persisted data.
+ */
 @Component
 public class PaymentFactory {
 

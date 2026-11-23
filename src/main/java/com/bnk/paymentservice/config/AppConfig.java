@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
 
+/**
+ * Registers shared application beans and configuration properties.
+ */
 @Configuration
 @EnableConfigurationProperties({
         PaymentMessagingProperties.class,

@@ -2,6 +2,9 @@ package com.bnk.paymentservice.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Holds polling and batch settings for the transactional outbox publisher.
+ */
 @ConfigurationProperties(prefix = "payment.outbox")
 public class PaymentOutboxProperties {
 

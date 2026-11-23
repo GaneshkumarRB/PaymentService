@@ -4,6 +4,9 @@ import com.bnk.paymentservice.common.AppConstants;
 
 import java.util.UUID;
 
+/**
+ * Indicates that the requested payment identifier does not exist.
+ */
 public class PaymentNotFoundException extends BadRequestException {
 
     private final UUID paymentId;
