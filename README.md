@@ -2,6 +2,58 @@
 
 This spring boot service accepts payment submissions, persists them, reliably publishes `PaymentSubmitted` events via a **transactional outbox**, and processes them with three isolated consumers (notification, fraud screening, ledger).
 
+## High-level architecture
+
+```mermaid
+flowchart LR
+  Client["API client"]
+
+  subgraph Service["Payment Service"]
+    API["Payment API<br/>POST /payments<br/>GET /payments/{id}"]
+    PaymentService["Validation and<br/>payment service"]
+    Publisher["Scheduled outbox publisher"]
+    Broker["In-memory broker<br/>per-consumer queues and retries"]
+    Fraud["Fraud screening consumer"]
+    Ledger["Ledger consumer"]
+    Notification["Notification consumer"]
+    FraudClient["Fraud HTTP/XML client"]
+    Stub["Fraud stub<br/>(enabled by default)"]
+  end
+
+  subgraph DB["Database"]
+    Payments[("Payments")]
+    Outbox[("Outbox messages")]
+    LedgerEntries[("Ledger entries")]
+    Processed[("Processed events")]
+    DLQ[("Dead-letter messages")]
+  end
+
+  Vendor["External fraud provider<br/>(optional)"]
+  Log["Notification log"]
+
+  Client -->|"Submit / retrieve"| API
+  API --> PaymentService
+  PaymentService -->|"Save / read payment"| Payments
+  PaymentService -->|"Save event in same transaction"| Outbox
+  Outbox -->|"Poll pending events"| Publisher
+  Publisher -->|"Publish event"| Broker
+  Publisher -->|"Mark published"| Outbox
+  Broker --> Fraud
+  Broker --> Ledger
+  Broker --> Notification
+  Fraud --> FraudClient
+  FraudClient -->|"HTTP/XML"| Stub
+  FraudClient -.->|"HTTP/XML when stub disabled"| Vendor
+  Fraud -->|"Update fraud decision and status"| Payments
+  Ledger -->|"Post debit"| LedgerEntries
+  Ledger -->|"Update ledger status"| Payments
+  Notification --> Log
+  Broker -->|"Record successful processing"| Processed
+  Broker -->|"After maximum attempts"| DLQ
+```
+
+The API returns after saving the payment and outbox event; the three consumers run asynchronously and independently. In particular, ledger posting does **not** wait for fraud approval, so a declined payment may still have `ledgerPosted: true`.
+
 ## Architecture choices
 
 ### Transactional outbox
@@ -9,10 +61,12 @@ This spring boot service accepts payment submissions, persists them, reliably pu
 
 - Survives process restarts: unpublished rows remain `PENDING`.
 - Survives temporary broker failures: publish errors leave the row pending for the next poll.
-- At-least-once delivery is assumed; consumers are idempotent.
+- Consumers are designed to handle duplicate deliveries, but the in-memory broker does not guarantee delivery across restarts.
 
 ### In-process broker stub
 `InMemoryMessageBroker` fans each event out to **per-consumer queues** with concurrent workers, exponential backoff retries, and a durable `dead_letter_messages` table after max attempts. One failing/slow consumer does not block the others.
+
+The broker queues and scheduled retries are in memory. A restart can lose queued events after the outbox row has been marked `PUBLISHED`; the durable outbox alone does not provide end-to-end delivery guarantees with this stub.
 
 Swap `payment.fraud.base-url` (and disable the stub) to point at a real fraud provider without changing payment API code. Replacing the in-process broker with Kafka/RabbitMQ would keep the outbox and consumer contracts intact.
 

@@ -41,7 +41,11 @@ import java.util.regex.Pattern;
 public class FraudScreeningStubController {
 
     private static final Logger log = LoggerFactory.getLogger(FraudScreeningStubController.class);
-    private static final Pattern AMOUNT = Pattern.compile("<(?:\\w+:)?Amount>([^<]+)</(?:\\w+:)?Amount>");
+    private static final Pattern REQUEST = Pattern.compile(
+            "\\s*(?:<\\?xml\\s+[^?]*\\?>\\s*)?<((?:[\\w.-]+:)?)ScreeningRequest(?:\\s+[^<>]*?)?\\s*>.*</\\1ScreeningRequest\\s*>\\s*",
+        Pattern.DOTALL);
+    private static final Pattern AMOUNT = Pattern.compile(
+            "<((?:[\\w.-]+:)?)Amount(?:\\s+[^<>]*?)?\\s*>([^<]+)</\\1Amount\\s*>");
 
     @Autowired
     private FraudStubProperties properties;
@@ -70,7 +74,13 @@ public class FraudScreeningStubController {
             produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> screen(@RequestBody(required = false) String requestXml) throws InterruptedException {
         simulateLatency();
-        BigDecimal amount = extractAmount(requestXml);
+        BigDecimal amount;
+        try {
+            amount = extractAmount(requestXml);
+        } catch (IllegalArgumentException ex) {
+            log.warn("Invalid fraud screening request: {}", ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
         log.debug("Stub screening request amount={}", amount);
 
         if (amount.compareTo(BigDecimal.valueOf(properties.getFailureAmountThreshold())) >= 0) {
@@ -89,18 +99,21 @@ public class FraudScreeningStubController {
     }
 
     private BigDecimal extractAmount(String requestXml) {
-        if (requestXml == null || requestXml.trim().isEmpty()) {
-            return BigDecimal.ZERO;
+        if (requestXml == null || !REQUEST.matcher(requestXml).matches()) {
+            throw new IllegalArgumentException("invalid screening request");
         }
         Matcher matcher = AMOUNT.matcher(requestXml);
         if (!matcher.find()) {
-            return BigDecimal.ZERO;
+            throw new IllegalArgumentException("Amount is missing or invalid");
         }
         try {
-            return new BigDecimal(matcher.group(1).trim());
+            BigDecimal amount = new BigDecimal(matcher.group(2).trim());
+            if (amount.signum() <= 0 || matcher.find()) {
+                throw new IllegalArgumentException("Amount must be a single positive number");
+            }
+            return amount;
         } catch (NumberFormatException ex) {
-            log.warn("Unable to parse Amount from screening request; treating as 0");
-            return BigDecimal.ZERO;
+            throw new IllegalArgumentException("invalid Amount", ex);
         }
     }
 

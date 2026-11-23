@@ -6,9 +6,9 @@ import com.bnk.paymentservice.fraud.api.model.ScreeningResult;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
- * Maps nested vendor elements {@code Header}/{@code Result}/{@code Error} onto generated fields.
+ * Jackson mix-in mapping nested Header, Result and Error elements onto the generated model.
  */
-public abstract class ScreeningResponseMixin {
+public abstract class ScreeningResponseXmlMapping {
 
     @JacksonXmlProperty(localName = "Header")
     abstract ScreeningHeader getHeader();

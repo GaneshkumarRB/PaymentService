@@ -7,9 +7,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import java.util.List;
 
 /**
- * Maps wrapped {@code <Reasons><Reason>...</Reason></Reasons>} onto generated reasons list.
+ * Jackson mix-in mapping wrapped Reason elements onto the generated reasons list.
  */
-public abstract class ScreeningResultMixin {
+public abstract class ScreeningResultXmlMapping {
 
     @JacksonXmlElementWrapper(localName = "Reasons")
     @JacksonXmlProperty(localName = "Reason")

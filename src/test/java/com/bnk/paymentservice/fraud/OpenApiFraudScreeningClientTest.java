@@ -3,6 +3,7 @@ package com.bnk.paymentservice.fraud;
 import com.bnk.paymentservice.config.FraudClientConfig;
 import com.bnk.paymentservice.config.FraudClientProperties;
 import com.bnk.paymentservice.exception.FraudVendorException;
+import com.bnk.paymentservice.factory.FraudScreeningFactory;
 import com.bnk.paymentservice.fraud.api.ApiClient;
 import com.bnk.paymentservice.fraud.api.FraudScreeningApi;
 import com.bnk.paymentservice.models.FraudDecisionType;
@@ -54,6 +55,7 @@ class OpenApiFraudScreeningClientTest {
         client = new OpenApiFraudScreeningClient();
         ReflectionTestUtils.setField(client, "fraudScreeningApi", api);
         ReflectionTestUtils.setField(client, "fraudXmlMapper", xmlMapper);
+        ReflectionTestUtils.setField(client, "fraudScreeningFactory", new FraudScreeningFactory());
     }
 
     @Test

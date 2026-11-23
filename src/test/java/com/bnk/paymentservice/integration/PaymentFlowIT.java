@@ -100,6 +100,37 @@ class PaymentFlowIT {
     }
 
     @Test
+    void declinesPaymentAboveRiskThreshold() {
+        PaymentRequest request = new PaymentRequest();
+        AccountDetails source = new AccountDetails();
+        source.setName("Alice");
+        source.setAccountNumber("GB29NWBK60161331926819");
+        AccountDetails destination = new AccountDetails();
+        destination.setName("Bob");
+        destination.setAccountNumber("DE89370400440532013000");
+        request.setSourceAccount(source);
+        request.setDestinationAccount(destination);
+        request.setAmount(1200.0);
+        request.setCurrency(PaymentRequest.CurrencyEnum.EUR);
+        request.setReference("demo-1");
+        request.setRequestedExecutionDate(LocalDate.now().plusDays(1));
+
+        ResponseEntity<PaymentResponse> created = restTemplate.postForEntity("/payments", request, PaymentResponse.class);
+        assertEquals(HttpStatus.CREATED, created.getStatusCode());
+        assertNotNull(created.getBody());
+        UUID paymentId = created.getBody().getId();
+
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            ResponseEntity<PaymentResponse> fetched = restTemplate.getForEntity("/payments/" + paymentId, PaymentResponse.class);
+            assertEquals(HttpStatus.OK, fetched.getStatusCode());
+            assertNotNull(fetched.getBody());
+            assertNotNull(fetched.getBody().getFraudDecision());
+            assertEquals("DECLINE", fetched.getBody().getFraudDecision().getDecision().toString());
+            assertEquals("FAILED", fetched.getBody().getStatus().toString());
+        });
+    }
+
+    @Test
     void rejectsInvalidPayment() {
         PaymentRequest request = new PaymentRequest();
         AccountDetails source = new AccountDetails();

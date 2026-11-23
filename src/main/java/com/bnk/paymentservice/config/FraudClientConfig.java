@@ -1,9 +1,9 @@
 package com.bnk.paymentservice.config;
 
 import com.bnk.paymentservice.common.AppConstants;
-import com.bnk.paymentservice.fraud.ReasonMixin;
-import com.bnk.paymentservice.fraud.ScreeningResponseMixin;
-import com.bnk.paymentservice.fraud.ScreeningResultMixin;
+import com.bnk.paymentservice.fraud.ReasonXmlMapping;
+import com.bnk.paymentservice.fraud.ScreeningResponseXmlMapping;
+import com.bnk.paymentservice.fraud.ScreeningResultXmlMapping;
 import com.bnk.paymentservice.fraud.api.ApiClient;
 import com.bnk.paymentservice.fraud.api.FraudScreeningApi;
 import com.bnk.paymentservice.fraud.api.model.Reason;
@@ -36,9 +36,10 @@ public class FraudClientConfig {
         xmlMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         xmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
         xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        xmlMapper.addMixIn(ScreeningResponse.class, ScreeningResponseMixin.class);
-        xmlMapper.addMixIn(ScreeningResult.class, ScreeningResultMixin.class);
-        xmlMapper.addMixIn(Reason.class, ReasonMixin.class);
+        // Add XML annotations to generated models without modifying generated code.
+        xmlMapper.addMixIn(ScreeningResponse.class, ScreeningResponseXmlMapping.class);
+        xmlMapper.addMixIn(ScreeningResult.class, ScreeningResultXmlMapping.class);
+        xmlMapper.addMixIn(Reason.class, ReasonXmlMapping.class);
         return xmlMapper;
     }
 
